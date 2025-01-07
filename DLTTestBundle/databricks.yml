@@ -1,0 +1,114 @@
+# This is a Databricks asset bundle definition for DLTTestBundle.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: DLTTestBundle
+
+  git:
+    origin_url: string
+    branch: string
+
+include:
+  - resources/*.yml
+
+#targets:
+#  dev:
+#    # The default target uses 'mode: development' to create a development copy.
+#    # - Deployed resources get prefixed with '[dev my_user_name]'
+#    # - Any job schedules and triggers are paused by default.
+#    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
+#    mode: development
+#    default: true
+#    workspace:
+#      host: https://dbc-ed001880-9366.cloud.databricks.com
+#    permissions:
+#      - user_name: aiacovella@chariotsolutions.com
+#        level: CAN_MANAGE
+#    run_as:
+#      user_name: aiacovella@chariotsolutions.com
+#
+#  prod:
+#    mode: production
+#    workspace:
+#      host: https://dbc-ed001880-9366.cloud.databricks.com
+#      # We explicitly specify /Workspace/Users/aiacovella@chariotsolutions.com to make sure we only have a single copy.
+#      root_path: /Workspace/Users/aiacovella@chariotsolutions.com/.bundle/${bundle.name}/${bundle.target}
+#    permissions:
+#      - user_name: aiacovella@chariotsolutions.com
+#        level: CAN_MANAGE
+#    run_as:
+#      user_name: aiacovella@chariotsolutions.com
+
+resources:
+
+  pipelines:
+    # Demo DLT Pipeline
+    demo_dlt_pipeline:
+      name: "[${bundle.environment}] Demo DLT Pipeline"
+      target: "demo_dlt_${bundle.environment}"
+      libraries:
+        - file:
+            path: ./dbconnect.py
+        - notebook:
+            path: ./del-north_cdc.py
+      channel: preview
+      configuration:
+        "bundle.file_path": "${workspace.file_path}"
+
+  jobs:
+    test_dlt_job:
+      name: "Test DLT Job"
+
+      tasks:
+        - task_key: dlt_test_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.dlt_pipeline.id}
+
+      job_clusters:
+        - job_cluster_key: cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            node_type_id: m5d.large
+            num_workers: 2
+            spark_conf:
+              "spark.databricks.cluster.profile": "singleNode"
+              "spark.master": "local[*, 4]"
+            custom_tags:
+              "ResourceClass": "SingleNode"
+
+environments:
+  development:
+    default: true
+
+    resources:
+      pipelines:
+        demo_dlt_pipeline:
+          development: true
+
+  qa: # Used for test runs from a pull request
+    workspace:
+      host: https://dbc-ed001880-9366.cloud.databricks.com
+
+    resources:
+      pipelines:
+        demo_dlt_pipeline:
+          development: true
+          permissions:
+            - level: CAN_VIEW
+              group_name: users
+
+  production: # Used for test runs from a pull request
+    workspace:
+      host: https://dbc-ed001880-9366.cloud.databricks.com
+
+    resources:
+      pipelines:
+        demo_dlt_pipeline:
+          development: false
+          photon: false
+          permissions:
+            - level: CAN_VIEW
+              group_name: users
+          clusters:
+            - autoscale:
+                min_workers: 2
+                max_workers: 8
