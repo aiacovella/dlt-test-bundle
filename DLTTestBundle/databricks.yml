@@ -4,8 +4,8 @@ bundle:
   name: DLTTestBundle
 
   git:
-    origin_url: string
-    branch: string
+    origin_url: https://github.com/aiacovella/dlt-test-bundle.git
+    branch: main
 
 include:
   - resources/*.yml
@@ -40,28 +40,43 @@ include:
 
 resources:
 
+  volumes:
+    demo_volume:
+      catalog_name: "${bundle.environment}_demo_catalog"
+      name: "${bundle.environment}_demo_volume"
+      schema_name: "default"
+
   pipelines:
     # Demo DLT Pipeline
     demo_dlt_pipeline:
       name: "[${bundle.environment}] Demo DLT Pipeline"
-      target: "demo_dlt_${bundle.environment}"
+      target: "default" # Schema reference
+      catalog: "${bundle.environment}_demo_catalog"
+
       libraries:
         - file:
             path: ./dbconnect.py
         - notebook:
             path: ./del-north_cdc.py
+
       channel: preview
       configuration:
         "bundle.file_path": "${workspace.file_path}"
 
   jobs:
     test_dlt_job:
-      name: "Test DLT Job"
+      name: "${bundle.environment}_DLT_job"
 
       tasks:
         - task_key: dlt_test_pipeline
           pipeline_task:
-            pipeline_id: ${resources.pipelines.dlt_pipeline.id}
+            pipeline_id: ${resources.pipelines.demo_dlt_pipeline.id}
+          libraries:
+            - pypi:
+                package: wheel==0.41.2
+            - pypi:
+                package: numpy==1.25.2
+                repo: https://pypi.org/simple/
 
       job_clusters:
         - job_cluster_key: cluster
@@ -78,11 +93,20 @@ resources:
 environments:
   development:
     default: true
+    workspace:
+      host: https://dbc-ed001880-9366.cloud.databricks.com
 
     resources:
       pipelines:
         demo_dlt_pipeline:
           development: true
+          permissions:
+            - level: CAN_VIEW
+              group_name: users
+          clusters:
+            - node_type_id: m5d.large
+            - num_workers: 2
+
 
   qa: # Used for test runs from a pull request
     workspace:
@@ -95,6 +119,9 @@ environments:
           permissions:
             - level: CAN_VIEW
               group_name: users
+          clusters:
+            - node_type_id: m5d.large
+            - num_workers: 2
 
   production: # Used for test runs from a pull request
     workspace:
@@ -109,6 +136,5 @@ environments:
             - level: CAN_VIEW
               group_name: users
           clusters:
-            - autoscale:
-                min_workers: 2
-                max_workers: 8
+            - node_type_id: m5d.large
+            - num_workers: 2

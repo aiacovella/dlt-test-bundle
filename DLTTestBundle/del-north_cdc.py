@@ -8,8 +8,10 @@ sys.path.append("./shared")
 from dbconnect import read_kinesis_stream
 
 
-print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+# param = dbutils.widgets.get("FOO_PARAM")
+# print(param)
+# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 
 AWS_KEY = dbutils.secrets.get(scope="TestSecretBucket", key="AWS_KEY")
@@ -45,12 +47,12 @@ raw_schema = StructType([
 
 @dlt.table(name="users_silver")
 def users_silver():
-    
+
     users_schema = StructType([
         StructField("id", IntegerType(), True),
         StructField("first_name", StringType(), True),
         StructField("last_name", StringType(), True),
-        StructField("email", StringType(), True),   
+        StructField("email", StringType(), True),
         StructField("phone_number", StringType(), True),
         StructField("age", IntegerType(), True),
         StructField("address", StringType(), True),
@@ -71,7 +73,7 @@ def users_silver():
 
 @dlt.table(name="organizations_silver")
 def organizations_silver():
-    
+
     org_schema = StructType([
         StructField("id", IntegerType(), True),
         StructField("org_name", StringType(), True),
