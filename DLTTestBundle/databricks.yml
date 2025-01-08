@@ -39,6 +39,20 @@ resources:
     test_dlt_job:
       name: "${bundle.environment}_DLT_job"
 
+      # These appear to have to be valid emails within Databricks user accounts
+      email_notifications:
+        on_start:
+          - aiacovella@chariotsolutions.com
+          - java.peritus@gmail.com
+
+        on_success:
+          - aiacovella@chariotsolutions.com
+          - java.peritus@gmail.com
+
+        on_failure:
+          - aiacovella@chariotsolutions.com
+          - java.peritus@gmail.com
+
       tasks:
         - task_key: dlt_test_pipeline
           pipeline_task:
@@ -50,6 +64,13 @@ resources:
                 package: numpy==1.25.2
                 repo: https://pypi.org/simple/
 
+      schedule:
+          quartz_cron_expression: "0 0/10 * * * ?"
+          timezone_id: "UTC"
+          pause_status: "UNPAUSED"
+
+
+      # Start a new cluster with each job run
       job_clusters:
         - job_cluster_key: cluster
           new_cluster:
@@ -61,6 +82,11 @@ resources:
               "spark.master": "local[*, 4]"
             custom_tags:
               "ResourceClass": "SingleNode"
+
+      # To user an existing cluster (not recommended since it requires an expensive general purpose cluster)
+      #      job_cluster:
+      #        - job_cluster_key: cluster
+      #          existing_cluster_id: '0102-181314-mqlpg55p'
 
 environments:
   development:
