@@ -85,3 +85,10 @@ dmypy.json
 
 # Virtual environment
 venv
+
+# Databricks excludes
+.databricks/
+build/
+dist/
+scratch/**
+!scratch/README.md
