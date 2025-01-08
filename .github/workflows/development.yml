@@ -50,7 +50,7 @@ jobs:
       - name: Display secret
         run: echo "Pipeline Update secret is ${{ secrets.DATABRICKS_TOKEN }}"
 
-      - run: databricks bundle run development_DLT_job --refresh-all
+      - run: databricks bundle run test_dlt_job
         env:
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           DATABRICKS_BUNDLE_ENV: development
