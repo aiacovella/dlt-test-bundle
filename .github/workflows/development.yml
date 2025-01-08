@@ -22,6 +22,9 @@ jobs:
     environment: development
 
     steps:
+      - name: Use secret
+        run: echo "Deploy bundle secret is ${{secrets.DATABRICKS_TOKEN}}"
+
       - uses: actions/checkout@v3
 
       - uses: databricks/setup-cli@main
@@ -34,6 +37,7 @@ jobs:
   pipeline_update:
     name: "Run pipeline update"
     runs-on: ubuntu-latest
+    environment: development
 
     needs:
       - deploy
@@ -43,8 +47,10 @@ jobs:
 
       - uses: databricks/setup-cli@main
 
-      - run: databricks bundle run development_DLT_job --refresh-all
+      - name: Display secret
+        run: echo "Pipeline Update secret is ${{ secrets.DATABRICKS_TOKEN }}"
 
+      - run: databricks bundle run development_DLT_job --refresh-all
         env:
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           DATABRICKS_BUNDLE_ENV: development
