@@ -19,6 +19,7 @@ jobs:
   deploy:
     name: "Deploy bundle"
     runs-on: ubuntu-latest
+    environment: development
 
     steps:
       - uses: actions/checkout@v3
@@ -27,7 +28,6 @@ jobs:
 
       - run: databricks bundle deploy
         env:
-          ENVIRONMENT: development
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           DATABRICKS_BUNDLE_ENV: development
 
