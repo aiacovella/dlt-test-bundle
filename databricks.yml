@@ -27,7 +27,7 @@ resources:
 
       libraries:
         - file:
-            path: ./dbconnect.py
+            path: ./stream_utils.py
         - notebook:
             path: ./del-north_cdc.py
 
@@ -65,9 +65,9 @@ resources:
                 repo: https://pypi.org/simple/
 
       schedule:
-          quartz_cron_expression: "0 0/10 * * * ?"
+          quartz_cron_expression: "0 0 * * * ?"
           timezone_id: "UTC"
-          pause_status: "UNPAUSED"
+          pause_status: "PAUSED"
 
 
       # Start a new cluster with each job run
