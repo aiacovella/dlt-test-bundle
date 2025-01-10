@@ -35,7 +35,7 @@ raw_schema = StructType([
 ])
 
 
-@dlt.table(name="users_bronze")
+@dlt.view(name="users_bronze_view")
 def users_bronze():
     user_schema = StructType([
         StructField("metadata", StructType([
@@ -65,7 +65,7 @@ def users_bronze():
             "json_data.data.last_name", "json_data.data.email","json_data.data.phone_number", "json_data.data.age", "json_data.data.address", "json_data.data.city", "json_data.data.state", "json_data.data.zip")
     )
 
-@dlt.table(name="organizations_bronze")
+@dlt.view(name="organizations_bronze_view")
 def organizations_bronze():
     org_schema = StructType([
         StructField("metadata", StructType([
@@ -88,13 +88,3 @@ def organizations_bronze():
                     "json_data.data.region")
     )
 
-# COMMAND ----------
-
-
-# COMMAND ----------
-
-
-# COMMAND ----------
-
-
-# COMMAND ----------
