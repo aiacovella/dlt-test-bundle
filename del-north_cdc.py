@@ -111,13 +111,13 @@ def organizations_bronze_view():
 
 # Apply changes and dedupe
 apply_changes(
-    target_table="users_bronze",
+    target_table="users_silver",
     source_view="users_bronze_view",
     primary_keys=["id"]
 )
 
 apply_changes(
-    target_table="organizations_bronze",
+    target_table="organizations_silver",
     source_view="organizations_bronze_view",
     primary_keys=["id"]
 )
