@@ -33,6 +33,7 @@ jobs:
         env:
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           DATABRICKS_BUNDLE_ENV: development
+          BUNDLE_VAR_remote_source_identifier: YourSourceHere
 
   pipeline_update:
     name: "Run pipeline update"

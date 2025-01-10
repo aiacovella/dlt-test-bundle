@@ -10,6 +10,12 @@ bundle:
 include:
   - resources/*.yml
 
+
+variables:
+  remote_source_identifier:
+    description: "Source where the Kinesis CDC is streaming from"
+    default: "unset"
+
 resources:
 
   volumes:
@@ -38,6 +44,10 @@ resources:
   jobs:
     test_dlt_job:
       name: "${bundle.environment}_DLT_job"
+
+      parameters:
+        - name: REMOTE_SOURCE
+          default: "${var.remote_source_identifier}"
 
       # These appear to have to be valid emails within Databricks user accounts
       email_notifications:
