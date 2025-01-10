@@ -1,11 +1,12 @@
 # Databricks notebook source
+
 import dlt
 from pyspark.sql.functions import col, from_json, decode
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 import sys
 
 sys.path.append("./shared")
-from stream_utils import read_kinesis_stream
+from stream_utils import read_kinesis_stream, apply_changes
 
 # print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 # param = dbutils.widgets.get("FOO_PARAM")
@@ -27,6 +28,7 @@ def kinesis_raw_stream():
     return read_kinesis_stream(stream_name=STREAM, dbutils=dbutils, spark=spark)
 
 
+
 raw_schema = StructType([
     StructField("metadata", StructType([
         StructField("table-name", StringType(), True)
@@ -36,11 +38,12 @@ raw_schema = StructType([
 
 
 @dlt.view(name="users_bronze_view")
-def users_bronze():
+def users_bronze_view():
     user_schema = StructType([
         StructField("metadata", StructType([
             StructField("table-name", StringType(), True),
-            StructField("timestamp", TimestampType(), True)
+            StructField("timestamp", TimestampType(), True),
+            StructField("operation", StringType(), True)
         ]), True),
         StructField("data", StructType([
             StructField("id", IntegerType(), True),
@@ -61,16 +64,29 @@ def users_bronze():
         .select(decode(col("data"), "UTF-8").alias("json_string"))
         .select(from_json(col("json_string"), user_schema).alias("json_data")) \
         .filter(col("json_data.metadata.table-name") == "users") \
-        .select("json_data.metadata.timestamp", "json_data.data.id", "json_data.data.first_name",
-            "json_data.data.last_name", "json_data.data.email","json_data.data.phone_number", "json_data.data.age", "json_data.data.address", "json_data.data.city", "json_data.data.state", "json_data.data.zip")
+        .select(
+            "json_data.metadata.timestamp",
+            "json_data.metadata.operation",
+            "json_data.data.id",
+            "json_data.data.first_name",
+            "json_data.data.last_name",
+            "json_data.data.email",
+            "json_data.data.phone_number",
+            "json_data.data.age",
+            "json_data.data.address",
+            "json_data.data.city",
+            "json_data.data.state",
+            "json_data.data.zip"
+        )
     )
 
 @dlt.view(name="organizations_bronze_view")
-def organizations_bronze():
+def organizations_bronze_view():
     org_schema = StructType([
         StructField("metadata", StructType([
             StructField("table-name", StringType(), True),
-            StructField("timestamp", TimestampType(), True)
+            StructField("timestamp", TimestampType(), True),
+            StructField("operation", StringType(), True)
         ]), True),
         StructField("data", StructType([
             StructField("id", IntegerType(), True),
@@ -84,7 +100,24 @@ def organizations_bronze():
             .select(decode(col("data"), "UTF-8").alias("json_string")) \
             .select(from_json(col("json_string"), org_schema).alias("json_data")) \
             .filter(col("json_data.metadata.table-name") == "organizations") \
-            .select("json_data.metadata.timestamp", "json_data.data.id", "json_data.data.org_name",
-                    "json_data.data.region")
+            .select(
+                "json_data.metadata.timestamp",
+                "json_data.metadata.operation",
+                "json_data.data.id",
+                "json_data.data.org_name",
+                "json_data.data.region"
+            )
     )
 
+# Apply changes and dedupe
+apply_changes(
+    target_table="users_silver",
+    source_view="users_bronze_view",
+    primary_keys=["id"]
+)
+
+apply_changes(
+    target_table="organizations_silver",
+    source_view="organizations_bronze_view",
+    primary_keys=["id"]
+)
