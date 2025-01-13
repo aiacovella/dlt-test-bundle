@@ -5,13 +5,15 @@ from pyspark.sql.functions import col, from_json, decode
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 import sys
 
-sys.path.append("./shared")
+sys.path.append("../common")
+
 from stream_utils import read_kinesis_stream, apply_changes
 
-# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-# param = dbutils.widgets.get("FOO_PARAM")
-# print(param)
-# print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+test_job_param = dbutils.widgets.get("REMOTE_SOURCE")
+print(test_job_param)
+print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 
 AWS_KEY = dbutils.secrets.get(scope="TestSecretBucket", key="AWS_KEY")

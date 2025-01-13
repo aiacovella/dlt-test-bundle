@@ -33,9 +33,9 @@ resources:
 
       libraries:
         - file:
-            path: ./stream_utils.py
+            path: ./src/common/stream_utils.py
         - notebook:
-            path: ./del-north_cdc.py
+            path: ./src/notebooks/del-north_cdc.py
 
       channel: preview
       configuration:
